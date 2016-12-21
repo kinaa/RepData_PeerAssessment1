@@ -11,7 +11,8 @@ Show any code that is needed to
 1. Load the data (i.e. read.csv())
 2. Process/transform the data (if necessary) into a format suitable for your analysis
 
-```{r loading}
+
+```r
 #read data
 data <- read.csv("./activity.csv")
 
@@ -26,7 +27,8 @@ For this part of the assignment, you can ignore the missing values in the datase
 2. Make a histogram of the total number of steps taken each day
 3. Calculate and report the mean and median of the total number of steps taken per day
 
-```{r 1}
+
+```r
 #creating new data set with total nr of steps taken per day
 library(dplyr)
 stepsPERday1 <- group_by(data, date)
@@ -34,9 +36,18 @@ stepsPERday <- summarize(stepsPERday1, Sum=sum(steps))
 
 #plotting histogram of total number of steps per day
 hist(stepsPERday$Sum, main = "Histogram - total number of steps per day", xlab = "Steps per day")
+```
 
+![plot of chunk 1](figure/1-1.png)
+
+```r
 #calculating median and mean    
 summary(stepsPERday$Sum)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##      41    8841   10760   10770   13290   21190       8
 ```
 
 In the table above we see the mean and the median of the total number of steps taken per day
@@ -46,7 +57,8 @@ In the table above we see the mean and the median of the total number of steps t
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r 2}
+
+```r
 #group and summarize data per mean interval
 avgPERinterval1 <- group_by(data, interval)
 avgPERinterval <- summarize(avgPERinterval1, Mean=(mean(steps, na.rm=TRUE)))
@@ -56,14 +68,18 @@ plot(type="l",
      avgPERinterval,
      main = "Histogram of avg number of steps per interval"
      )
+```
 
+![plot of chunk 2](figure/2-1.png)
+
+```r
 #show the interval with maximum number of steps on average
 a <- avgPERinterval[which.max(avgPERinterval$Mean),]
 max_interval <- a[1,1]
 max_steps <- a[1,2]
 ```
 
-** The interval `r max_interval` has the maximum average value of steps `r max_steps`.**
+** The interval 835 has the maximum average value of steps 206.1698113.**
 
 ## Imputing missing values
 
@@ -74,10 +90,17 @@ Note that there are a number of days/intervals where there are missing values (c
 4. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 3. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-```{r 3}
+
+```r
 #total number of rows with NA
 sum(is.na(data))
+```
 
+```
+## [1] 2304
+```
+
+```r
 #replacing NA values with mean per interval
 full_data <- merge(data, avgPERinterval, by.x ="interval", by.y="interval", all.x=TRUE)
 full_data <- arrange(full_data, date)
@@ -89,9 +112,18 @@ full_stepsPERday <- summarize(full_stepsPERday1, Sum=sum(steps))
 
 #plotting histogram of total number of steps per day
 hist(full_stepsPERday$Sum, main = "Histogram of total number of steps per day (after imputing NAs)", xlab = "Steps per day")
+```
 
+![plot of chunk 3](figure/3-1.png)
+
+```r
 #calculating median and mean    
 summary(full_stepsPERday$Sum)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10770   10770   12810   21190
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -99,7 +131,8 @@ summary(full_stepsPERday$Sum)
 1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
-```{r 4}
+
+```r
 weekday_data1 <- mutate(data, day=weekdays(data$date))
 weekday_data <- mutate(weekday_data1, day.type = ifelse (day == "zaterdag" | day == "zondag", "weekend", "weekday"))
 
@@ -111,3 +144,5 @@ require(ggplot2)
 g <- ggplot(weekday_avgPERinterval, aes(x=interval, y=Mean))
 g+ geom_line() + labs(title="Average steps per interval") + facet_grid(day.type ~ .)
 ```
+
+![plot of chunk 4](figure/4-1.png)
